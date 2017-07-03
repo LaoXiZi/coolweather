@@ -3,10 +3,10 @@ package com.sq.coolweather;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,6 +78,7 @@ public class ChooseAreaFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.choose_area, container, false);
+        view.setBackgroundColor(Color.WHITE);
         backButton = (Button) view.findViewById(R.id.back_button);
         title = (TextView) view.findViewById(R.id.title_text);
         listView = (ListView) view.findViewById(R.id.list_view);
@@ -98,14 +99,19 @@ public class ChooseAreaFragment extends Fragment {
                 } else if (currentLevel == LEVEL_CITY) {
                     selectorCity = cityList.get(position);
                     queryCounties();
-                }else if (currentLevel == LEVEL_COUNTY) {
-                    String weatherId = countyList.get(position).getWeatherId().trim();
-                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
-                    intent.putExtra("weather_id",weatherId);
-                    Log.i(TAG,"weatherId" + weatherId);
-                    Log.i(TAG,"countyList" + countyList.size());
-                    startActivity(intent);
-                    getActivity().finish();
+                } else if (currentLevel == LEVEL_COUNTY) {
+                    String weatherId = countyList.get(position).getWeatherId();
+                    if (getActivity() instanceof MainActivity) {
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        intent.putExtra("weather_id", weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }else if (getActivity() instanceof  WeatherActivity) {
+                        WeatherActivity activity = (WeatherActivity) getActivity();
+                        activity.drawerLayout.closeDrawers();
+                        activity.swipeRefresh.setRefreshing(true);
+                        activity.requesWeather(weatherId);
+                    }
                 }
             }
         });
@@ -228,7 +234,7 @@ public class ChooseAreaFragment extends Fragment {
                     });
                 }
             }
-    });
+        });
     }
 
     /**
